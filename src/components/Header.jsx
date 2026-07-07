@@ -1,6 +1,6 @@
 import { Lock } from "lucide-react";
 
-export default function Header({ research, milestones }) {
+export default function Header({ research, milestones, onNewResearch, onCompleteMilestone }) {
   return (
     <header className="app-header">
       <div className="header-top">
@@ -14,7 +14,8 @@ export default function Header({ research, milestones }) {
 
         <div className="header-actions">
           <button className="ghost-button">Dashboard</button>
-          <button className="primary-button">+ Nuova ricerca</button>
+          <button className="ghost-button" onClick={onCompleteMilestone}>Completa milestone</button>
+          <button className="primary-button" onClick={onNewResearch}>+ Nuova ricerca</button>
         </div>
       </div>
 
