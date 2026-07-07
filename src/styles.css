@@ -430,6 +430,10 @@ h1 {
   box-shadow: 0 28px 80px rgba(0, 0, 0, .24);
 }
 
+.modal-card.wide {
+  width: 680px;
+}
+
 .modal-card h2 {
   margin: 4px 0 6px;
 }
@@ -454,6 +458,45 @@ h1 {
   border-radius: 12px;
   padding: 12px;
   outline: none;
+}
+
+.output-preview {
+  margin-top: 16px;
+  border: 1px solid var(--carel-border);
+  background: #fbfbfc;
+  border-radius: 16px;
+  padding: 18px;
+}
+
+.output-preview h3 {
+  margin: 10px 0 8px;
+}
+
+.output-preview p {
+  color: var(--carel-muted);
+  line-height: 1.45;
+}
+
+.output-file-name {
+  display: inline-flex;
+  background: var(--carel-soft-red);
+  color: var(--carel-red);
+  border: 1px solid #fecdd3;
+  border-radius: 999px;
+  padding: 7px 10px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.folder-preview {
+  margin-top: 16px;
+  background: #fbfbfc;
+  border: 1px solid var(--carel-border);
+  border-radius: 14px;
+  padding: 14px;
+  display: grid;
+  gap: 8px;
+  font-size: 14px;
 }
 
 .modal-actions {
