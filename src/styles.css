@@ -155,25 +155,43 @@ h1 {
 
 .milestones {
   display: flex;
-  gap: 26px;
-  margin-top: 12px;
+  align-items: center;
+  gap: 18px;
+  margin-top: 14px;
   color: var(--carel-muted);
   font-size: 13px;
+  flex-wrap: wrap;
 }
 
 .milestone {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 6px;
+  font-weight: 700;
+}
+
+.milestone.completed {
+  color: #15803d;
 }
 
 .milestone.active {
   color: var(--carel-red);
-  font-weight: 800;
+}
+
+.milestone.todo {
+  color: #6b7280;
 }
 
 .milestone.locked {
-  opacity: .65;
+  color: #9ca3af;
+}
+
+.active-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--carel-red);
+  display: inline-block;
 }
 
 .dot {
