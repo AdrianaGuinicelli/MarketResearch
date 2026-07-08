@@ -7,7 +7,6 @@ export default function Header({
   totalMilestones,
   nextMilestone,
   onCompanyUpload,
-  onCompleteMilestone,
   onOpenMilestones
 }) {
   return (
@@ -15,7 +14,6 @@ export default function Header({
       <div className="header-top">
         <div className="brand-block">
           <img src="/carel-logo.png" alt="CAREL" className="carel-logo" />
-
           <div>
             <div className="eyebrow">AI Workspace</div>
             <h1>Market Research Navigator</h1>
@@ -24,10 +22,6 @@ export default function Header({
 
         <div className="header-actions">
           <button className="ghost-button">Dashboard</button>
-
-          <button className="ghost-button" onClick={onCompleteMilestone}>
-            Completa milestone
-          </button>
 
           <button className="primary-button" onClick={onCompanyUpload}>
             <Paperclip size={16} />
@@ -52,10 +46,7 @@ export default function Header({
       </div>
 
       <div className="progress-track">
-        <div
-          className="progress-fill"
-          style={{ width: `${research.progress}%` }}
-        />
+        <div className="progress-fill" style={{ width: `${research.progress}%` }} />
       </div>
     </header>
   );
