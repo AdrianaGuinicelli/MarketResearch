@@ -20,7 +20,33 @@ const milestoneFlow = [
 
 export default function App() {
   const [selectedResearch, setSelectedResearch] = useState(researches[0]);
-  const [currentMilestoneIndex, setCurrentMilestoneIndex] = useState(0);
+ const [milestones, setMilestones] = useState([
+  {
+    key: "setup",
+    label: "Setup",
+    status: "completed"
+  },
+  {
+    key: "collection",
+    label: "Data Collection",
+    status: "active"
+  },
+  {
+    key: "modeling",
+    label: "Modeling",
+    status: "todo"
+  },
+  {
+    key: "validation",
+    label: "Validation",
+    status: "todo"
+  },
+  {
+    key: "summary",
+    label: "Executive Summary",
+    status: "locked"
+  }
+]);
   const [isNewResearchOpen, setIsNewResearchOpen] = useState(false);
   const [isCompleteOpen, setIsCompleteOpen] = useState(false);
   const [isSavedOpen, setIsSavedOpen] = useState(false);
