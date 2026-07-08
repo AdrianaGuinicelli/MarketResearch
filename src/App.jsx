@@ -41,9 +41,20 @@ export default function App() {
         <KnowledgePanel knowledge={knowledgeUsed} />
       </main>
 
-      {isNewResearchOpen && <NewResearchModal onClose={() => setIsNewResearchOpen(false)} />}
-      {isCompleteOpen && <CompleteMilestoneModal onClose={() => setIsCompleteOpen(false)} onSave={handleSaveOutput} />}
-      {isSavedOpen && <SaveSuccessModal onClose={() => setIsSavedOpen(false)} />}
+      {isNewResearchOpen && (
+        <NewResearchModal onClose={() => setIsNewResearchOpen(false)} />
+      )}
+
+      {isCompleteOpen && (
+        <CompleteMilestoneModal
+          onClose={() => setIsCompleteOpen(false)}
+          onSave={handleSaveOutput}
+        />
+      )}
+
+      {isSavedOpen && (
+        <SaveSuccessModal onClose={() => setIsSavedOpen(false)} />
+      )}
     </div>
   );
 }
