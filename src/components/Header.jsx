@@ -1,6 +1,11 @@
 import { Lock } from "lucide-react";
 
-export default function Header({ research, milestones, onNewResearch, onCompleteMilestone }) {
+export default function Header({
+  research,
+  milestones,
+  onNewResearch,
+  onCompleteMilestone
+}) {
   return (
     <header className="app-header">
       <div className="header-top">
@@ -14,27 +19,40 @@ export default function Header({ research, milestones, onNewResearch, onComplete
 
         <div className="header-actions">
           <button className="ghost-button">Dashboard</button>
-          <button className="ghost-button" onClick={onCompleteMilestone}>Completa milestone</button>
-          <button className="primary-button" onClick={onNewResearch}>+ Nuova ricerca</button>
+          <button className="ghost-button" onClick={onCompleteMilestone}>
+            Completa milestone
+          </button>
+          <button className="primary-button" onClick={onNewResearch}>
+            + Nuova ricerca
+          </button>
         </div>
       </div>
 
       <div className="research-line">
         <div>
           <div className="research-name">{research.title}</div>
-          <div className="research-meta">Owner: Adriana Guinicelli · {research.date}</div>
+          <div className="research-meta">
+            Owner: Adriana Guinicelli · {research.date}
+          </div>
         </div>
         <div className="progress-number">{research.progress}%</div>
       </div>
 
       <div className="progress-track">
-        <div className="progress-fill" style={{ width: `${research.progress}%` }} />
+        <div
+          className="progress-fill"
+          style={{ width: `${research.progress}%` }}
+        />
       </div>
 
       <div className="milestones">
         {milestones.map((item) => (
           <div className={`milestone ${item.status}`} key={item.key}>
-            {item.status === "locked" ? <Lock size={14} /> : <span className="dot" />}
+            {item.status === "locked" ? (
+              <Lock size={14} />
+            ) : (
+              <span className="dot" />
+            )}
             <span>{item.label}</span>
           </div>
         ))}
