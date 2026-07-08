@@ -655,4 +655,21 @@ h1 {
   font-size: 12px;
   color: var(--carel-muted);
 }
+  .secondary-button.compact {
+  padding: 8px 11px;
+  font-size: 12px;
+  border-radius: 9px;
+}
+
+.milestone-panel-action {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+}
+
+.locked-label {
+  color: #9ca3af;
+  font-size: 12px;
+  font-weight: 800;
+}
 }
