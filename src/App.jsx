@@ -53,30 +53,84 @@ export default function App() {
   const [isCompanyKnowledgeOpen, setIsCompanyKnowledgeOpen] = useState(false);
   const [isMilestonePanelOpen, setIsMilestonePanelOpen] = useState(false);
 
-  const progress = Math.round(((currentMilestoneIndex + 1) / milestoneFlow.length) * 100);
+const completedMilestones =
+  milestones.filter(m => m.status === "completed").length;
 
-  const milestones = milestoneFlow.map((milestone, index) => {
-    if (index < currentMilestoneIndex) return { ...milestone, status: "completed" };
-    if (index === currentMilestoneIndex) return { ...milestone, status: "active" };
-    if (milestone.key === "summary" && currentMilestoneIndex < 4) return { ...milestone, status: "locked" };
-    return { ...milestone, status: "todo" };
-  });
+const progress = Math.round(
+  (completedMilestones / milestones.length) * 100
+);
+
+const activeMilestone =
+  milestones.find(m => m.status === "active") ??
+  milestones.find(m => m.status === "todo") ??
+  milestones[milestones.length - 1];
+
+const currentMilestoneIndex =
+  milestones.findIndex(m => m.key === activeMilestone.key);
+
+const nextMilestone =
+  milestones[currentMilestoneIndex + 1];
 
   const activeMilestone = milestones[currentMilestoneIndex];
 
-  function handleSaveOutput() {
-    setIsCompleteOpen(false);
-    setIsSavedOpen(true);
+function handleCompleteMilestone(key) {
 
-    if (currentMilestoneIndex < milestoneFlow.length - 1) {
-      setCurrentMilestoneIndex((prev) => prev + 1);
-    }
-  }
+  setMilestones(prev => {
 
-  function handleCompleteFromPanel() {
-    setIsMilestonePanelOpen(false);
-    setIsCompleteOpen(true);
-  }
+    const updated = prev.map(m => {
+
+      if (m.key === key)
+        return {
+          ...m,
+          status: "completed"
+        };
+
+      return m;
+
+    });
+
+    const firstTodo = updated.find(
+      m => m.status === "todo"
+    );
+
+    return updated.map(m => {
+
+      if (
+        m.status === "active" &&
+        m.key !== key
+      )
+        return {
+          ...m,
+          status: "completed"
+        };
+
+      if (
+        firstTodo &&
+        m.key === firstTodo.key
+      )
+        return {
+          ...m,
+          status: "active"
+        };
+
+      return m;
+
+    });
+
+  });
+
+  setIsCompleteOpen(false);
+  setIsSavedOpen(true);
+
+}
+
+function handleCompleteFromPanel(selectedKey) {
+
+  setIsMilestonePanelOpen(false);
+
+  setIsCompleteOpen(true);
+
+}
 
   return (
     <div className="app-shell">
