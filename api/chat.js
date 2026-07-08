@@ -4,6 +4,8 @@ export default async function handler(req, res) {
   }
 
   try {
+    console.log("OPENAI_API_KEY exists:", !!process.env.OPENAI_API_KEY);
+console.log("Environment keys:", Object.keys(process.env).filter(k => k.includes("OPENAI")));
     const { message } = req.body;
 
     if (!message) {
