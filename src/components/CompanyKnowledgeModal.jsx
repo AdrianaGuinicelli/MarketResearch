@@ -1,119 +1,206 @@
-import { useRef, useState } from "react";
-import { Paperclip, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Paperclip, X, Trash2, Loader2 } from "lucide-react";
 
 export default function CompanyKnowledgeModal({ onClose }) {
-  const fileInputRef = useRef(null);
-  const [docs, setDocs] = useState([]);
-  const [isUploading, setIsUploading] = useState(false);
+  const inputRef = useRef(null);
 
-  async function handleUpload(event) {
+  const [files, setFiles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+
+  async function loadFiles() {
+    setLoading(true);
+
+    try {
+      const response = await fetch("/api/company-files");
+      const data = await response.json();
+
+      setFiles(data.files || []);
+    } catch (e) {
+      console.error(e);
+    }
+
+    setLoading(false);
+  }
+
+  useEffect(() => {
+    loadFiles();
+  }, []);
+
+  async function uploadFile(event) {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    setIsUploading(true);
+    setUploading(true);
 
     const formData = new FormData();
     formData.append("file", file);
     formData.append("scope", "company");
 
     try {
-      const response = await fetch("/api/upload", {
+      await fetch("/api/upload", {
         method: "POST",
         body: formData
       });
 
-      const data = await response.json();
+      await loadFiles();
+    } catch (e) {
+      console.error(e);
+    }
 
-      if (!response.ok) {
-        throw new Error(data.error || "Upload failed");
-      }
+    setUploading(false);
+    event.target.value = "";
+  }
 
-      setDocs((prev) => [
-        ...prev,
-        {
-          name: data.file.name,
-          status: "Indexed"
-        }
-      ]);
-    } catch (error) {
-      setDocs((prev) => [
-        ...prev,
-        {
-          name: `Errore upload: ${error.message}`,
-          status: "Error"
-        }
-      ]);
-    } finally {
-      setIsUploading(false);
-      event.target.value = "";
+  async function deleteFile(fileId) {
+    if (!window.confirm("Eliminare questo documento dalla Company Knowledge?"))
+      return;
+
+    try {
+      await fetch(`/api/company-files?fileId=${fileId}`, {
+        method: "DELETE"
+      });
+
+      await loadFiles();
+    } catch (e) {
+      console.error(e);
     }
   }
 
   return (
     <div className="modal-overlay">
       <div className="modal-card wide">
+
         <div className="modal-header">
+
           <div>
-            <div className="eyebrow">Company Knowledge</div>
+            <div className="eyebrow">
+              Company Knowledge
+            </div>
+
             <h2>Knowledge aziendale</h2>
           </div>
 
-          <button className="icon-button" onClick={onClose}>
+          <button
+            className="icon-button"
+            onClick={onClose}
+          >
             <X size={18} />
           </button>
+
         </div>
 
         <p className="modal-copy">
-          Carica qui i documenti che devono essere disponibili per tutte le ricerche future.
+          Tutti i documenti caricati qui saranno disponibili automaticamente
+          in ogni futura ricerca.
         </p>
 
         <input
-          ref={fileInputRef}
+          ref={inputRef}
           type="file"
-          style={{ display: "none" }}
-          onChange={handleUpload}
+          hidden
+          onChange={uploadFile}
         />
 
-        <div className="knowledge-upload-box">
-          <div>
-            <strong>Upload documento aziendale</strong>
-            <p>
-              Il file verrà aggiunto alla Company Knowledge e potrà essere usato dal Navigator in ogni ricerca.
-            </p>
+        <button
+          className="primary-button"
+          onClick={() => inputRef.current.click()}
+          disabled={uploading}
+        >
+          <Paperclip size={16} />
+
+          {uploading
+            ? "Caricamento..."
+            : "Carica documento"}
+        </button>
+
+        <div
+          style={{
+            marginTop: 28
+          }}
+        >
+
+          <strong>Documenti indicizzati</strong>
+
+          <div
+            style={{
+              marginTop: 15
+            }}
+          >
+
+            {loading && (
+              <Loader2
+                size={20}
+                className="spin"
+              />
+            )}
+
+            {!loading && files.length === 0 && (
+              <div className="knowledge-item">
+                Nessun documento presente.
+              </div>
+            )}
+
+            {!loading &&
+              files.map((file) => (
+
+                <div
+                  key={file.fileId}
+                  className="knowledge-item"
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center"
+                  }}
+                >
+
+                  <div>
+
+                    <div
+                      style={{
+                        fontWeight: 700
+                      }}
+                    >
+                      {file.name}
+                    </div>
+
+                    <div
+                      style={{
+                        fontSize: 12,
+                        color: "#777"
+                      }}
+                    >
+                      {file.status}
+                    </div>
+
+                  </div>
+
+                  <button
+                    className="icon-button"
+                    onClick={() => deleteFile(file.fileId)}
+                  >
+                    <Trash2 size={16} />
+                  </button>
+
+                </div>
+
+              ))}
+
           </div>
 
-          <button
-            className="primary-button"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={isUploading}
-          >
-            <Paperclip size={16} />
-            {isUploading ? "Caricamento..." : "Carica file"}
-          </button>
-        </div>
-
-        <div className="modal-section-title">Documenti caricati in questa sessione</div>
-
-        <div className="modal-doc-list">
-          {docs.length === 0 && (
-            <div className="knowledge-item">
-              Nessun documento caricato da questo pannello.
-            </div>
-          )}
-
-          {docs.map((doc, index) => (
-            <div className="modal-doc-item" key={index}>
-              <span>{doc.name}</span>
-              <span className="doc-status">{doc.status}</span>
-            </div>
-          ))}
         </div>
 
         <div className="modal-actions">
-          <button className="secondary-button" onClick={onClose}>
+
+          <button
+            className="secondary-button"
+            onClick={onClose}
+          >
             Chiudi
           </button>
+
         </div>
+
       </div>
     </div>
   );
