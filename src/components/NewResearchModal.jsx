@@ -24,4 +24,4 @@ export default function NewResearchModal({ onClose }) {
       </div>
     </div>
   );
-}
+
