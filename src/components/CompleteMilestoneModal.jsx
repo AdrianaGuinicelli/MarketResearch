@@ -29,12 +29,17 @@ export default function CompleteMilestoneModal({ onClose, onSave }) {
         </div>
 
         <div className="modal-actions">
-          <button className="secondary-button" onClick={onClose}>
-            Continua nella chat
-          </button>
-          <button className="primary-button" onClick={onSave}>
-            Salva output
-          </button>
+<button className="secondary-button" onClick={onClose}>
+  Continua nella chat
+</button>
+
+<button className="secondary-button" onClick={onSave}>
+  Completa senza salvare
+</button>
+
+<button className="primary-button" onClick={onSave}>
+  Salva output e completa
+</button>
         </div>
       </div>
     </div>
