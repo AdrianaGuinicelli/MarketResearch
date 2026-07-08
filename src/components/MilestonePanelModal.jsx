@@ -21,38 +21,62 @@ export default function MilestonePanelModal({
         </div>
 
         <p className="modal-copy">
-          Le milestone indicano la maturità della ricerca. Puoi completare la
-          milestone attiva quando ritieni che il lavoro sia pronto per essere
-          salvato o validato.
+          Puoi dichiarare completata una milestone quando ritieni che quella
+          parte della ricerca sia sufficientemente matura. Non è obbligatorio
+          seguire un ordine rigido.
         </p>
 
         <div className="milestone-panel-list">
-          {milestones.map((milestone, index) => (
-            <div
-              key={milestone.key}
-              className={`milestone-panel-item ${milestone.status}`}
-            >
-              <div className="milestone-panel-icon">
-                {milestone.status === "completed" && <CheckCircle2 size={18} />}
-                {milestone.status === "active" && <Circle size={18} />}
-                {milestone.status === "todo" && <Circle size={18} />}
-                {milestone.status === "locked" && <Lock size={18} />}
-              </div>
+          {milestones.map((milestone, index) => {
+            const isLocked = milestone.status === "locked";
+            const isCompleted = milestone.status === "completed";
+            const isActive = milestone.key === activeMilestone.key;
 
-              <div className="milestone-panel-content">
-                <strong>
-                  {index + 1}. {milestone.label}
-                </strong>
+            return (
+              <div
+                key={milestone.key}
+                className={`milestone-panel-item ${milestone.status}`}
+              >
+                <div className="milestone-panel-icon">
+                  {isCompleted && <CheckCircle2 size={20} />}
+                  {!isCompleted && !isLocked && <Circle size={20} />}
+                  {isLocked && <Lock size={20} />}
+                </div>
 
-                <span>
-                  {milestone.status === "completed" && "Completata"}
-                  {milestone.status === "active" && "Attiva"}
-                  {milestone.status === "todo" && "Da completare"}
-                  {milestone.status === "locked" && "Bloccata"}
-                </span>
+                <div className="milestone-panel-content">
+                  <strong>
+                    {index + 1}. {milestone.label}
+                  </strong>
+
+                  <span>
+                    {isCompleted && "Completata"}
+                    {!isCompleted && isActive && "Attiva"}
+                    {!isCompleted && !isActive && !isLocked && "Disponibile"}
+                    {isLocked && "Bloccata"}
+                  </span>
+                </div>
+
+                <div className="milestone-panel-action">
+                  {isCompleted && (
+                    <span className="doc-status">Completed</span>
+                  )}
+
+                  {!isCompleted && !isLocked && (
+                    <button
+                      className="secondary-button compact"
+                      onClick={() => onComplete(milestone)}
+                    >
+                      Completa
+                    </button>
+                  )}
+
+                  {isLocked && (
+                    <span className="locked-label">Locked</span>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         <div className="output-preview">
@@ -61,7 +85,7 @@ export default function MilestonePanelModal({
           </div>
 
           <p>
-            Se completi questa milestone, il Navigator ti chiederà se vuoi
+            Quando completi una milestone, il Navigator ti chiederà se vuoi
             salvare l’output nella knowledge della ricerca o nella Company
             Knowledge.
           </p>
@@ -70,10 +94,6 @@ export default function MilestonePanelModal({
         <div className="modal-actions">
           <button className="secondary-button" onClick={onClose}>
             Chiudi
-          </button>
-
-          <button className="primary-button" onClick={onComplete}>
-            Completa milestone attiva
           </button>
         </div>
       </div>
