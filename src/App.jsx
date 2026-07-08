@@ -10,139 +10,94 @@ import CompanyKnowledgeModal from "./components/CompanyKnowledgeModal.jsx";
 import MilestonePanelModal from "./components/MilestonePanelModal.jsx";
 import { researches, messages, knowledgeUsed } from "./data/mockData.js";
 
-const milestoneFlow = [
-  { key: "setup", label: "Setup" },
-  { key: "collection", label: "Data Collection" },
-  { key: "modeling", label: "Modeling" },
-  { key: "validation", label: "Validation" },
-  { key: "summary", label: "Executive Summary" }
+const initialMilestones = [
+  { key: "setup", label: "Setup", status: "completed" },
+  { key: "collection", label: "Data Collection", status: "active" },
+  { key: "modeling", label: "Modeling", status: "todo" },
+  { key: "validation", label: "Validation", status: "todo" },
+  { key: "summary", label: "Executive Summary", status: "locked" }
 ];
 
 export default function App() {
   const [selectedResearch, setSelectedResearch] = useState(researches[0]);
- const [milestones, setMilestones] = useState([
-  {
-    key: "setup",
-    label: "Setup",
-    status: "completed"
-  },
-  {
-    key: "collection",
-    label: "Data Collection",
-    status: "active"
-  },
-  {
-    key: "modeling",
-    label: "Modeling",
-    status: "todo"
-  },
-  {
-    key: "validation",
-    label: "Validation",
-    status: "todo"
-  },
-  {
-    key: "summary",
-    label: "Executive Summary",
-    status: "locked"
-  }
-]);
+  const [milestones, setMilestones] = useState(initialMilestones);
+  const [selectedMilestone, setSelectedMilestone] = useState(null);
+
   const [isNewResearchOpen, setIsNewResearchOpen] = useState(false);
   const [isCompleteOpen, setIsCompleteOpen] = useState(false);
   const [isSavedOpen, setIsSavedOpen] = useState(false);
   const [isCompanyKnowledgeOpen, setIsCompanyKnowledgeOpen] = useState(false);
   const [isMilestonePanelOpen, setIsMilestonePanelOpen] = useState(false);
 
-const completedMilestones =
-  milestones.filter(m => m.status === "completed").length;
+  const completedMilestones = milestones.filter(
+    (milestone) => milestone.status === "completed"
+  ).length;
 
-const progress = Math.round(
-  (completedMilestones / milestones.length) * 100
-);
+  const progress = Math.round(
+    (completedMilestones / milestones.length) * 100
+  );
 
-const activeMilestone =
-  milestones.find(m => m.status === "active") ??
-  milestones.find(m => m.status === "todo") ??
-  milestones[milestones.length - 1];
+  const activeMilestone =
+    milestones.find((milestone) => milestone.status === "active") ||
+    milestones.find((milestone) => milestone.status === "todo") ||
+    milestones[milestones.length - 1];
 
-const currentMilestoneIndex =
-  milestones.findIndex(m => m.key === activeMilestone.key);
+  const currentMilestoneIndex = milestones.findIndex(
+    (milestone) => milestone.key === activeMilestone.key
+  );
 
-const nextMilestone =
-  milestones[currentMilestoneIndex + 1];
+  const nextMilestone = milestones[currentMilestoneIndex + 1];
 
-  const activeMilestone = milestones[currentMilestoneIndex];
+  function openCompleteMilestone(milestone = activeMilestone) {
+    if (milestone.status === "locked") return;
+    setSelectedMilestone(milestone);
+    setIsMilestonePanelOpen(false);
+    setIsCompleteOpen(true);
+  }
 
-function handleCompleteMilestone(key) {
+  function handleSaveOutput() {
+    const milestoneToComplete = selectedMilestone || activeMilestone;
 
-  setMilestones(prev => {
+    setMilestones((prev) => {
+      const updated = prev.map((milestone) =>
+        milestone.key === milestoneToComplete.key
+          ? { ...milestone, status: "completed" }
+          : milestone
+      );
 
-    const updated = prev.map(m => {
+      const hasActive = updated.some(
+        (milestone) => milestone.status === "active"
+      );
 
-      if (m.key === key)
-        return {
-          ...m,
-          status: "completed"
-        };
+      if (hasActive) return updated;
 
-      return m;
+      const firstTodo = updated.find(
+        (milestone) => milestone.status === "todo"
+      );
 
+      if (!firstTodo) return updated;
+
+      return updated.map((milestone) =>
+        milestone.key === firstTodo.key
+          ? { ...milestone, status: "active" }
+          : milestone
+      );
     });
 
-    const firstTodo = updated.find(
-      m => m.status === "todo"
-    );
-
-    return updated.map(m => {
-
-      if (
-        m.status === "active" &&
-        m.key !== key
-      )
-        return {
-          ...m,
-          status: "completed"
-        };
-
-      if (
-        firstTodo &&
-        m.key === firstTodo.key
-      )
-        return {
-          ...m,
-          status: "active"
-        };
-
-      return m;
-
-    });
-
-  });
-
-  setIsCompleteOpen(false);
-  setIsSavedOpen(true);
-
-}
-
-function handleCompleteFromPanel(selectedKey) {
-
-  setIsMilestonePanelOpen(false);
-
-  setIsCompleteOpen(true);
-
-}
+    setIsCompleteOpen(false);
+    setIsSavedOpen(true);
+  }
 
   return (
     <div className="app-shell">
       <Header
         research={{ ...selectedResearch, status: activeMilestone.label, progress }}
-        milestones={milestones}
         activeMilestone={activeMilestone}
         currentMilestoneIndex={currentMilestoneIndex}
-        totalMilestones={milestoneFlow.length}
-        nextMilestone={milestoneFlow[currentMilestoneIndex + 1]}
+        totalMilestones={milestones.length}
+        nextMilestone={nextMilestone}
         onCompanyUpload={() => setIsCompanyKnowledgeOpen(true)}
-        onCompleteMilestone={() => setIsCompleteOpen(true)}
+        onCompleteMilestone={() => openCompleteMilestone(activeMilestone)}
         onOpenMilestones={() => setIsMilestonePanelOpen(true)}
       />
 
@@ -178,13 +133,13 @@ function handleCompleteFromPanel(selectedKey) {
           milestones={milestones}
           activeMilestone={activeMilestone}
           onClose={() => setIsMilestonePanelOpen(false)}
-          onComplete={handleCompleteFromPanel}
+          onComplete={openCompleteMilestone}
         />
       )}
 
       {isCompleteOpen && (
         <CompleteMilestoneModal
-          milestone={activeMilestone}
+          milestone={selectedMilestone || activeMilestone}
           research={selectedResearch}
           onClose={() => setIsCompleteOpen(false)}
           onSave={handleSaveOutput}
@@ -193,9 +148,12 @@ function handleCompleteFromPanel(selectedKey) {
 
       {isSavedOpen && (
         <SaveSuccessModal
-          milestone={milestoneFlow[Math.max(currentMilestoneIndex - 1, 0)]}
+          milestone={selectedMilestone || activeMilestone}
           research={selectedResearch}
-          onClose={() => setIsSavedOpen(false)}
+          onClose={() => {
+            setIsSavedOpen(false);
+            setSelectedMilestone(null);
+          }}
         />
       )}
     </div>
