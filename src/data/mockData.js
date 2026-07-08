@@ -67,3 +67,4 @@ export const knowledgeUsed = {
     "Initial business need"
   ]
 };
+
