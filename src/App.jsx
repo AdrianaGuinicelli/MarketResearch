@@ -6,6 +6,7 @@ import KnowledgePanel from "./components/KnowledgePanel.jsx";
 import NewResearchModal from "./components/NewResearchModal.jsx";
 import CompleteMilestoneModal from "./components/CompleteMilestoneModal.jsx";
 import SaveSuccessModal from "./components/SaveSuccessModal.jsx";
+import CompanyKnowledgeModal from "./components/CompanyKnowledgeModal.jsx";
 import { researches, messages, knowledgeUsed } from "./data/mockData.js";
 
 const milestoneFlow = [
@@ -22,22 +23,14 @@ export default function App() {
   const [isNewResearchOpen, setIsNewResearchOpen] = useState(false);
   const [isCompleteOpen, setIsCompleteOpen] = useState(false);
   const [isSavedOpen, setIsSavedOpen] = useState(false);
+  const [isCompanyKnowledgeOpen, setIsCompanyKnowledgeOpen] = useState(false);
 
   const progress = Math.round(((currentMilestoneIndex + 1) / milestoneFlow.length) * 100);
 
   const milestones = milestoneFlow.map((milestone, index) => {
-    if (index < currentMilestoneIndex) {
-      return { ...milestone, status: "completed" };
-    }
-
-    if (index === currentMilestoneIndex) {
-      return { ...milestone, status: "active" };
-    }
-
-    if (milestone.key === "summary" && currentMilestoneIndex < 4) {
-      return { ...milestone, status: "locked" };
-    }
-
+    if (index < currentMilestoneIndex) return { ...milestone, status: "completed" };
+    if (index === currentMilestoneIndex) return { ...milestone, status: "active" };
+    if (milestone.key === "summary" && currentMilestoneIndex < 4) return { ...milestone, status: "locked" };
     return { ...milestone, status: "todo" };
   });
 
@@ -55,16 +48,10 @@ export default function App() {
   return (
     <div className="app-shell">
       <Header
-        research={{
-          ...selectedResearch,
-          status: activeMilestone.label,
-          progress
-        }}
+        research={{ ...selectedResearch, status: activeMilestone.label, progress }}
         milestones={milestones}
         activeMilestone={activeMilestone}
-        onCompanyUpload={() => {
-          window.dispatchEvent(new CustomEvent("open-company-upload"));
-        }}
+        onCompanyUpload={() => setIsCompanyKnowledgeOpen(true)}
         onCompleteMilestone={() => setIsCompleteOpen(true)}
       />
 
@@ -83,6 +70,16 @@ export default function App() {
 
       {isNewResearchOpen && (
         <NewResearchModal onClose={() => setIsNewResearchOpen(false)} />
+      )}
+
+      {isCompanyKnowledgeOpen && (
+        <CompanyKnowledgeModal
+          onClose={() => setIsCompanyKnowledgeOpen(false)}
+          onUpload={() => {
+            setIsCompanyKnowledgeOpen(false);
+            window.dispatchEvent(new CustomEvent("open-company-upload"));
+          }}
+        />
       )}
 
       {isCompleteOpen && (
