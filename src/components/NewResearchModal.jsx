@@ -4,6 +4,7 @@ export default function NewResearchModal({ onClose }) {
       <div className="modal-card">
         <div className="eyebrow">New Workspace</div>
         <h2>Nuova ricerca di mercato</h2>
+
         <p className="modal-copy">
           Inserisci solo le informazioni essenziali. Il Navigator ti aiuterà a definire il resto.
         </p>
@@ -18,10 +19,15 @@ export default function NewResearchModal({ onClose }) {
         />
 
         <div className="modal-actions">
-          <button className="secondary-button" onClick={onClose}>Annulla</button>
-          <button className="primary-button" onClick={onClose}>Crea ricerca</button>
+          <button className="secondary-button" onClick={onClose}>
+            Annulla
+          </button>
+          <button className="primary-button" onClick={onClose}>
+            Crea ricerca
+          </button>
         </div>
       </div>
     </div>
   );
+}
 
