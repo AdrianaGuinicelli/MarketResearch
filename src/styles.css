@@ -538,4 +538,65 @@ h1 {
   .knowledge-panel {
     display: none;
   }
+
+  .modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.knowledge-upload-box {
+  margin-top: 18px;
+  border: 1px solid var(--carel-border);
+  background: #fbfbfc;
+  border-radius: 16px;
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.knowledge-upload-box p {
+  margin: 6px 0 0;
+  color: var(--carel-muted);
+  line-height: 1.4;
+}
+
+.modal-section-title {
+  margin-top: 22px;
+  color: var(--carel-muted);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.modal-doc-list {
+  margin-top: 10px;
+  display: grid;
+  gap: 8px;
+}
+
+.modal-doc-item {
+  border: 1px solid var(--carel-border);
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.doc-status {
+  background: #ecfdf5;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 800;
+}
 }
