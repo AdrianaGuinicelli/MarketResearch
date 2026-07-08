@@ -599,4 +599,60 @@ h1 {
   font-size: 11px;
   font-weight: 800;
 }
+  .milestone-summary {
+  margin-top: 4px;
+  border: none;
+  background: transparent;
+  color: var(--carel-muted);
+  font-size: 13px;
+  padding: 0;
+  cursor: pointer;
+}
+
+.milestone-summary:hover {
+  color: var(--carel-red);
+  text-decoration: underline;
+}
+
+.milestone-panel-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.milestone-panel-item {
+  border: 1px solid var(--carel-border);
+  border-radius: 14px;
+  padding: 13px 14px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  background: #ffffff;
+}
+
+.milestone-panel-item.completed {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+  color: #15803d;
+}
+
+.milestone-panel-item.active {
+  border-color: #fecdd3;
+  background: var(--carel-soft-red);
+  color: var(--carel-red);
+}
+
+.milestone-panel-item.locked {
+  opacity: .65;
+}
+
+.milestone-panel-content {
+  display: grid;
+  gap: 3px;
+}
+
+.milestone-panel-content span {
+  font-size: 12px;
+  color: var(--carel-muted);
+}
 }
