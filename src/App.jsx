@@ -7,6 +7,7 @@ import NewResearchModal from "./components/NewResearchModal.jsx";
 import CompleteMilestoneModal from "./components/CompleteMilestoneModal.jsx";
 import SaveSuccessModal from "./components/SaveSuccessModal.jsx";
 import CompanyKnowledgeModal from "./components/CompanyKnowledgeModal.jsx";
+import MilestonePanelModal from "./components/MilestonePanelModal.jsx";
 import { researches, messages, knowledgeUsed } from "./data/mockData.js";
 
 const milestoneFlow = [
@@ -24,6 +25,7 @@ export default function App() {
   const [isCompleteOpen, setIsCompleteOpen] = useState(false);
   const [isSavedOpen, setIsSavedOpen] = useState(false);
   const [isCompanyKnowledgeOpen, setIsCompanyKnowledgeOpen] = useState(false);
+  const [isMilestonePanelOpen, setIsMilestonePanelOpen] = useState(false);
 
   const progress = Math.round(((currentMilestoneIndex + 1) / milestoneFlow.length) * 100);
 
@@ -45,14 +47,23 @@ export default function App() {
     }
   }
 
+  function handleCompleteFromPanel() {
+    setIsMilestonePanelOpen(false);
+    setIsCompleteOpen(true);
+  }
+
   return (
     <div className="app-shell">
       <Header
         research={{ ...selectedResearch, status: activeMilestone.label, progress }}
         milestones={milestones}
         activeMilestone={activeMilestone}
+        currentMilestoneIndex={currentMilestoneIndex}
+        totalMilestones={milestoneFlow.length}
+        nextMilestone={milestoneFlow[currentMilestoneIndex + 1]}
         onCompanyUpload={() => setIsCompanyKnowledgeOpen(true)}
         onCompleteMilestone={() => setIsCompleteOpen(true)}
+        onOpenMilestones={() => setIsMilestonePanelOpen(true)}
       />
 
       <main className="workspace-grid">
@@ -79,6 +90,15 @@ export default function App() {
             setIsCompanyKnowledgeOpen(false);
             window.dispatchEvent(new CustomEvent("open-company-upload"));
           }}
+        />
+      )}
+
+      {isMilestonePanelOpen && (
+        <MilestonePanelModal
+          milestones={milestones}
+          activeMilestone={activeMilestone}
+          onClose={() => setIsMilestonePanelOpen(false)}
+          onComplete={handleCompleteFromPanel}
         />
       )}
 
