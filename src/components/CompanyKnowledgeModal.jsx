@@ -1,12 +1,54 @@
+import { useRef, useState } from "react";
 import { Paperclip, X } from "lucide-react";
 
-const companyDocs = [
-  "Market Research Scoping Sheet",
-  "E089 DC Scroll Chiller Value Proposition",
-  "Brochure KaizenHub.pdf"
-];
+export default function CompanyKnowledgeModal({ onClose }) {
+  const fileInputRef = useRef(null);
+  const [docs, setDocs] = useState([]);
+  const [isUploading, setIsUploading] = useState(false);
 
-export default function CompanyKnowledgeModal({ onClose, onUpload }) {
+  async function handleUpload(event) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("scope", "company");
+
+    try {
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Upload failed");
+      }
+
+      setDocs((prev) => [
+        ...prev,
+        {
+          name: data.file.name,
+          status: "Indexed"
+        }
+      ]);
+    } catch (error) {
+      setDocs((prev) => [
+        ...prev,
+        {
+          name: `Errore upload: ${error.message}`,
+          status: "Error"
+        }
+      ]);
+    } finally {
+      setIsUploading(false);
+      event.target.value = "";
+    }
+  }
+
   return (
     <div className="modal-overlay">
       <div className="modal-card wide">
@@ -25,6 +67,13 @@ export default function CompanyKnowledgeModal({ onClose, onUpload }) {
           Carica qui i documenti che devono essere disponibili per tutte le ricerche future.
         </p>
 
+        <input
+          ref={fileInputRef}
+          type="file"
+          style={{ display: "none" }}
+          onChange={handleUpload}
+        />
+
         <div className="knowledge-upload-box">
           <div>
             <strong>Upload documento aziendale</strong>
@@ -33,19 +82,29 @@ export default function CompanyKnowledgeModal({ onClose, onUpload }) {
             </p>
           </div>
 
-          <button className="primary-button" onClick={onUpload}>
+          <button
+            className="primary-button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploading}
+          >
             <Paperclip size={16} />
-            Carica file
+            {isUploading ? "Caricamento..." : "Carica file"}
           </button>
         </div>
 
-        <div className="modal-section-title">Documenti indicizzati</div>
+        <div className="modal-section-title">Documenti caricati in questa sessione</div>
 
         <div className="modal-doc-list">
-          {companyDocs.map((doc) => (
-            <div className="modal-doc-item" key={doc}>
-              <span>{doc}</span>
-              <span className="doc-status">Indexed</span>
+          {docs.length === 0 && (
+            <div className="knowledge-item">
+              Nessun documento caricato da questo pannello.
+            </div>
+          )}
+
+          {docs.map((doc, index) => (
+            <div className="modal-doc-item" key={index}>
+              <span>{doc.name}</span>
+              <span className="doc-status">{doc.status}</span>
             </div>
           ))}
         </div>
