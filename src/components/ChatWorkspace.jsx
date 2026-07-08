@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Paperclip, Send } from "lucide-react";
 
 export default function ChatWorkspace({ messages }) {
   const [chatMessages, setChatMessages] = useState(messages);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef(null);
 
   async function handleSend() {
     if (!input.trim() || isLoading) return;
@@ -31,13 +33,14 @@ export default function ChatWorkspace({ messages }) {
 
       const data = await response.json();
 
-      const aiMessage = {
-        role: "ai",
-        text: data.reply || data.error || "No response generated."
-      };
-
-      setChatMessages((prev) => [...prev, aiMessage]);
-    } catch (error) {
+      setChatMessages((prev) => [
+        ...prev,
+        {
+          role: "ai",
+          text: data.reply || data.error || "No response generated."
+        }
+      ]);
+    } catch {
       setChatMessages((prev) => [
         ...prev,
         {
@@ -47,6 +50,49 @@ export default function ChatWorkspace({ messages }) {
       ]);
     } finally {
       setIsLoading(false);
+    }
+  }
+
+  async function handleFileUpload(event) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("scope", "research");
+
+    try {
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Upload failed");
+      }
+
+      setChatMessages((prev) => [
+        ...prev,
+        {
+          role: "ai",
+          text: `Documento caricato nella knowledge della ricerca: ${data.file.name}`
+        }
+      ]);
+    } catch (error) {
+      setChatMessages((prev) => [
+        ...prev,
+        {
+          role: "ai",
+          text: `Errore durante il caricamento del documento: ${error.message}`
+        }
+      ]);
+    } finally {
+      setIsUploading(false);
+      event.target.value = "";
     }
   }
 
@@ -65,7 +111,7 @@ export default function ChatWorkspace({ messages }) {
           <h2>Conversazione di ricerca</h2>
         </div>
         <span className="status-pill">
-          {isLoading ? "Thinking..." : "AI connected"}
+          {isUploading ? "Uploading..." : isLoading ? "Thinking..." : "AI connected"}
         </span>
       </div>
 
@@ -82,7 +128,18 @@ export default function ChatWorkspace({ messages }) {
       </div>
 
       <div className="composer">
-        <button className="icon-button">
+        <input
+          ref={fileInputRef}
+          type="file"
+          style={{ display: "none" }}
+          onChange={handleFileUpload}
+        />
+
+        <button
+          className="icon-button"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={isUploading || isLoading}
+        >
           <Paperclip size={18} />
         </button>
 
@@ -92,10 +149,14 @@ export default function ChatWorkspace({ messages }) {
           value={input}
           onChange={(event) => setInput(event.target.value)}
           onKeyDown={handleKeyDown}
-          disabled={isLoading}
+          disabled={isLoading || isUploading}
         />
 
-        <button className="send-button" onClick={handleSend} disabled={isLoading}>
+        <button
+          className="send-button"
+          onClick={handleSend}
+          disabled={isLoading || isUploading}
+        >
           <Send size={18} />
         </button>
       </div>
