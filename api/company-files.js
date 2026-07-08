@@ -26,8 +26,10 @@ export default async function handler(req, res) {
 
       const files = await Promise.all(
         (listData.data || []).map(async (item) => {
+          const fileId = item.id;
+
           const fileResponse = await fetch(
-            `https://api.openai.com/v1/files/${item.id}`,
+            `https://api.openai.com/v1/files/${fileId}`,
             {
               headers: {
                 Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
@@ -39,8 +41,8 @@ export default async function handler(req, res) {
 
           return {
             vectorStoreFileId: item.id,
-            fileId: item.id,
-            name: fileData.filename || item.id,
+            fileId,
+            name: fileData.filename || fileId,
             status: item.status,
             createdAt: item.created_at
           };
@@ -57,7 +59,7 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: "Missing fileId" });
       }
 
-      const deleteResponse = await fetch(
+      const deleteFromVectorStoreResponse = await fetch(
         `https://api.openai.com/v1/vector_stores/${vectorStoreId}/files/${fileId}`,
         {
           method: "DELETE",
@@ -67,17 +69,21 @@ export default async function handler(req, res) {
         }
       );
 
-      const deleteData = await deleteResponse.json();
+      const deleteFromVectorStoreData =
+        await deleteFromVectorStoreResponse.json();
 
-      if (!deleteResponse.ok) {
-        return res.status(deleteResponse.status).json({
-          error: deleteData.error?.message || "Cannot delete company file"
+      if (!deleteFromVectorStoreResponse.ok) {
+        return res.status(deleteFromVectorStoreResponse.status).json({
+          error:
+            deleteFromVectorStoreData.error?.message ||
+            "Cannot remove file from vector store"
         });
       }
 
       return res.status(200).json({
         success: true,
-        deleted: fileId
+        removedFromVectorStore: true,
+        fileId
       });
     }
 
