@@ -8,7 +8,11 @@ import CompleteMilestoneModal from "./components/CompleteMilestoneModal.jsx";
 import SaveSuccessModal from "./components/SaveSuccessModal.jsx";
 import CompanyKnowledgeModal from "./components/CompanyKnowledgeModal.jsx";
 import MilestonePanelModal from "./components/MilestonePanelModal.jsx";
-import { researches, messages, knowledgeUsed } from "./data/mockData.js";
+import {
+  researches,
+  messages,
+  knowledgeUsed as initialKnowledgeUsed
+} from "./data/mockData.js";
 
 const initialMilestones = [
   { key: "setup", label: "Setup", status: "completed" },
@@ -22,6 +26,7 @@ export default function App() {
   const [selectedResearch, setSelectedResearch] = useState(researches[0]);
   const [milestones, setMilestones] = useState(initialMilestones);
   const [selectedMilestone, setSelectedMilestone] = useState(null);
+  const [knowledgeUsed, setKnowledgeUsed] = useState(initialKnowledgeUsed);
 
   const [isNewResearchOpen, setIsNewResearchOpen] = useState(false);
   const [isCompleteOpen, setIsCompleteOpen] = useState(false);
@@ -33,9 +38,7 @@ export default function App() {
     (milestone) => milestone.status === "completed"
   ).length;
 
-  const progress = Math.round(
-    (completedMilestones / milestones.length) * 100
-  );
+  const progress = Math.round((completedMilestones / milestones.length) * 100);
 
   const activeMilestone =
     milestones.find((milestone) => milestone.status === "active") ||
@@ -48,6 +51,10 @@ export default function App() {
 
   const nextMilestone = milestones[currentMilestoneIndex + 1];
 
+  const sidebarResearches = researches.map((research) =>
+    research.id === selectedResearch.id ? selectedResearch : research
+  );
+
   function openCompleteMilestone(milestone = activeMilestone) {
     if (milestone.status === "locked") return;
     setSelectedMilestone(milestone);
@@ -57,47 +64,28 @@ export default function App() {
 
   function handleSaveOutput() {
     const milestoneToComplete = selectedMilestone || activeMilestone;
+    const nextProgress = Math.round(
+      ((completedMilestones + 1) / milestones.length) * 100
+    );
 
-    setMilestones((prev) => {
-      const updated = prev.map((milestone) =>
+    setMilestones((prev) =>
+      prev.map((milestone) =>
         milestone.key === milestoneToComplete.key
           ? { ...milestone, status: "completed" }
           : milestone
-      );
+      )
+    );
 
-      const hasActive = updated.some(
-        (milestone) => milestone.status === "active"
-      );
+    setSelectedResearch((prev) => ({
+      ...prev,
+      status: milestoneToComplete.label,
+      progress: nextProgress
+    }));
 
-      if (hasActive) return updated;
-
-      const firstTodo = updated.find(
-        (milestone) => milestone.status === "todo"
-      );
-
-      if (!firstTodo) return updated;
-
-      return updated.map((milestone) =>
-        milestone.key === firstTodo.key
-          ? { ...milestone, status: "active" }
-          : milestone
-      );
-    });
-
-  setIsCompleteOpen(false);
-setIsSavedOpen(true);
-
-setSelectedResearch((prev) => ({
-  ...prev,
-  status: milestoneToComplete.label,
-  progress: Math.round(
-    ((completedMilestones + 1) / milestones.length) * 100
-  )
-}));
+    setIsCompleteOpen(false);
+    setIsSavedOpen(true);
   }
-const sidebarResearches = researches.map((research) =>
-  research.id === selectedResearch.id ? selectedResearch : research
-);
+
   return (
     <div className="app-shell">
       <Header
@@ -112,14 +100,17 @@ const sidebarResearches = researches.map((research) =>
       />
 
       <main className="workspace-grid">
- <ResearchSidebar
-  researches={sidebarResearches}
-  selectedResearch={selectedResearch}
-  onSelect={setSelectedResearch}
-  onNewResearch={() => setIsNewResearchOpen(true)}
-/>
+        <ResearchSidebar
+          researches={sidebarResearches}
+          selectedResearch={selectedResearch}
+          onSelect={setSelectedResearch}
+          onNewResearch={() => setIsNewResearchOpen(true)}
+        />
 
-        <ChatWorkspace messages={messages} />
+        <ChatWorkspace
+          messages={messages}
+          onKnowledgeUsedChange={setKnowledgeUsed}
+        />
 
         <KnowledgePanel knowledge={knowledgeUsed} />
       </main>
@@ -131,10 +122,6 @@ const sidebarResearches = researches.map((research) =>
       {isCompanyKnowledgeOpen && (
         <CompanyKnowledgeModal
           onClose={() => setIsCompanyKnowledgeOpen(false)}
-          onUpload={() => {
-            setIsCompanyKnowledgeOpen(false);
-            window.dispatchEvent(new CustomEvent("open-company-upload"));
-          }}
         />
       )}
 
