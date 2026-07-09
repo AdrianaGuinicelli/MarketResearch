@@ -84,8 +84,16 @@ export default function App() {
       );
     });
 
-    setIsCompleteOpen(false);
-    setIsSavedOpen(true);
+  setIsCompleteOpen(false);
+setIsSavedOpen(true);
+
+setSelectedResearch((prev) => ({
+  ...prev,
+  status: milestoneToComplete.label,
+  progress: Math.round(
+    ((completedMilestones + 1) / milestones.length) * 100
+  )
+}));
   }
 
   return (
