@@ -672,4 +672,13 @@ h1 {
   font-size: 12px;
   font-weight: 800;
 }
+.knowledge-empty {
+  border: 1px dashed var(--carel-border);
+  border-radius: 14px;
+  padding: 18px;
+  color: var(--carel-muted);
+  background: #fbfbfc;
+  line-height: 1.4;
+}
+  
 }
