@@ -1,7 +1,50 @@
 import { useRef, useState } from "react";
 import { Paperclip, Send } from "lucide-react";
 
-export default function ChatWorkspace({ messages }) {
+function extractKnowledgeUsed(text) {
+  const knowledge = {
+    companyDocuments: [],
+    previousResearch: [],
+    webSources: [],
+    userInputs: []
+  };
+
+  const sectionStart = text.indexOf("Knowledge Used:");
+  if (sectionStart === -1) return knowledge;
+
+  const section = text.slice(sectionStart);
+
+  const lines = section
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  lines.forEach((line) => {
+    if (line.startsWith("- Company Knowledge:")) {
+      const value = line.replace("- Company Knowledge:", "").trim();
+      if (value && value !== "None") knowledge.companyDocuments.push(value);
+    }
+
+    if (line.startsWith("- Research Knowledge:")) {
+      const value = line.replace("- Research Knowledge:", "").trim();
+      if (value && value !== "None") knowledge.previousResearch.push(value);
+    }
+
+    if (line.startsWith("- Web sources:")) {
+      const value = line.replace("- Web sources:", "").trim();
+      if (value && value !== "None") knowledge.webSources.push(value);
+    }
+
+    if (line.startsWith("- User inputs and attachments:")) {
+      const value = line.replace("- User inputs and attachments:", "").trim();
+      if (value && value !== "None") knowledge.userInputs.push(value);
+    }
+  });
+
+  return knowledge;
+}
+
+export default function ChatWorkspace({ messages, onKnowledgeUsedChange }) {
   const [chatMessages, setChatMessages] = useState(messages);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -33,13 +76,18 @@ export default function ChatWorkspace({ messages }) {
 
       const data = await response.json();
 
-      setChatMessages((prev) => [
-        ...prev,
-        {
-          role: "ai",
-          text: data.reply || data.error || "No response generated."
-        }
-      ]);
+      const reply = data.reply || data.error || "No response generated.";
+
+      const aiMessage = {
+        role: "ai",
+        text: reply
+      };
+
+      setChatMessages((prev) => [...prev, aiMessage]);
+
+      if (onKnowledgeUsedChange) {
+        onKnowledgeUsedChange(extractKnowledgeUsed(reply));
+      }
     } catch {
       setChatMessages((prev) => [
         ...prev,
@@ -75,13 +123,25 @@ export default function ChatWorkspace({ messages }) {
         throw new Error(data.error || "Upload failed");
       }
 
+      const fileName = data.files?.[0]?.name || data.file?.name || file.name;
+
       setChatMessages((prev) => [
         ...prev,
         {
           role: "ai",
-          text: `Documento caricato nella knowledge della ricerca: ${data.file.name}`
+          text: `Documento caricato nella knowledge della ricerca: ${fileName}`
         }
       ]);
+
+      if (onKnowledgeUsedChange) {
+        onKnowledgeUsedChange((prev) => ({
+          ...prev,
+          userInputs: [
+            ...(prev?.userInputs || []),
+            `Uploaded attachment: ${fileName}`
+          ]
+        }));
+      }
     } catch (error) {
       setChatMessages((prev) => [
         ...prev,
@@ -139,6 +199,7 @@ export default function ChatWorkspace({ messages }) {
           className="icon-button"
           onClick={() => fileInputRef.current?.click()}
           disabled={isUploading || isLoading}
+          title="Carica documento nella Research Knowledge"
         >
           <Paperclip size={18} />
         </button>
