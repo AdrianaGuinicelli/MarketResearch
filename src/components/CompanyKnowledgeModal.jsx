@@ -1,60 +1,95 @@
 import { useEffect, useRef, useState } from "react";
-import { Paperclip, X, Trash2, Loader2 } from "lucide-react";
+import { Paperclip, X, Trash2, Loader2, Eye } from "lucide-react";
 
 export default function CompanyKnowledgeModal({ onClose }) {
   const inputRef = useRef(null);
 
   const [files, setFiles] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loadingFiles, setLoadingFiles] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadedCount, setUploadedCount] = useState(0);
+  const [showFiles, setShowFiles] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   async function loadFiles() {
-    setLoading(true);
+    setLoadingFiles(true);
 
     try {
       const response = await fetch("/api/company-files");
       const data = await response.json();
-
       setFiles(data.files || []);
-    } catch (e) {
-      console.error(e);
+    } catch (error) {
+      console.error(error);
     }
 
-    setLoading(false);
+    setLoadingFiles(false);
   }
 
   useEffect(() => {
     loadFiles();
   }, []);
 
-  async function uploadFile(event) {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  async function uploadFiles(fileList) {
+    const selectedFiles = Array.from(fileList || []);
+    if (selectedFiles.length === 0) return;
 
     setUploading(true);
+    setUploadedCount(0);
 
     const formData = new FormData();
-    formData.append("file", file);
+
+    selectedFiles.forEach((file) => {
+      formData.append("file", file);
+    });
+
     formData.append("scope", "company");
 
     try {
-      await fetch("/api/upload", {
+      const response = await fetch("/api/upload", {
         method: "POST",
         body: formData
       });
 
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Upload failed");
+      }
+
+      setUploadedCount(data.uploadedCount || selectedFiles.length);
       await loadFiles();
-    } catch (e) {
-      console.error(e);
+    } catch (error) {
+      console.error(error);
+      alert(`Errore upload: ${error.message}`);
     }
 
     setUploading(false);
+  }
+
+  function handleInputChange(event) {
+    uploadFiles(event.target.files);
     event.target.value = "";
   }
 
+  function handleDrop(event) {
+    event.preventDefault();
+    setIsDragging(false);
+    uploadFiles(event.dataTransfer.files);
+  }
+
+  function handleDragOver(event) {
+    event.preventDefault();
+    setIsDragging(true);
+  }
+
+  function handleDragLeave() {
+    setIsDragging(false);
+  }
+
   async function deleteFile(fileId) {
-    if (!window.confirm("Eliminare questo documento dalla Company Knowledge?"))
+    if (!window.confirm("Eliminare questo documento dalla Company Knowledge?")) {
       return;
+    }
 
     try {
       await fetch(`/api/company-files?fileId=${fileId}`, {
@@ -62,145 +97,102 @@ export default function CompanyKnowledgeModal({ onClose }) {
       });
 
       await loadFiles();
-    } catch (e) {
-      console.error(e);
+    } catch (error) {
+      console.error(error);
     }
   }
 
   return (
     <div className="modal-overlay">
       <div className="modal-card wide">
-
         <div className="modal-header">
-
           <div>
-            <div className="eyebrow">
-              Company Knowledge
-            </div>
-
+            <div className="eyebrow">Company Knowledge</div>
             <h2>Knowledge aziendale</h2>
           </div>
 
-          <button
-            className="icon-button"
-            onClick={onClose}
-          >
+          <button className="icon-button" onClick={onClose}>
             <X size={18} />
           </button>
-
         </div>
 
         <p className="modal-copy">
-          Tutti i documenti caricati qui saranno disponibili automaticamente
-          in ogni futura ricerca.
+          Carica qui i documenti che devono essere disponibili per tutte le ricerche future.
         </p>
 
         <input
           ref={inputRef}
           type="file"
+          multiple
           hidden
-          onChange={uploadFile}
+          onChange={handleInputChange}
         />
 
-        <button
-          className="primary-button"
-          onClick={() => inputRef.current.click()}
-          disabled={uploading}
-        >
-          <Paperclip size={16} />
-
-          {uploading
-            ? "Caricamento..."
-            : "Carica documento"}
-        </button>
-
         <div
-          style={{
-            marginTop: 28
-          }}
+          className={`dropzone ${isDragging ? "dragging" : ""}`}
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onClick={() => inputRef.current?.click()}
         >
+          <Paperclip size={22} />
+          <strong>
+            {uploading ? "Caricamento in corso..." : "Trascina qui i file o clicca per caricare"}
+          </strong>
+          <span>
+            Puoi caricare più documenti contemporaneamente.
+          </span>
+        </div>
 
-          <strong>Documenti indicizzati</strong>
+        {uploadedCount > 0 && (
+          <div className="upload-feedback">
+            {uploadedCount} file caricati nella Company Knowledge.
+          </div>
+        )}
 
-          <div
-            style={{
-              marginTop: 15
-            }}
+        <div className="company-files-toolbar">
+          <button
+            className="secondary-button"
+            onClick={() => setShowFiles((prev) => !prev)}
           >
+            <Eye size={16} />
+            {showFiles ? "Nascondi elenco file" : "Vedi elenco file"}
+          </button>
 
-            {loading && (
-              <Loader2
-                size={20}
-                className="spin"
-              />
-            )}
+          {loadingFiles && <Loader2 size={18} className="spin" />}
+        </div>
 
-            {!loading && files.length === 0 && (
+        {showFiles && (
+          <div className="modal-doc-list">
+            {files.length === 0 && (
               <div className="knowledge-item">
-                Nessun documento presente.
+                Nessun documento presente nella Company Knowledge.
               </div>
             )}
 
-            {!loading &&
-              files.map((file) => (
-
-                <div
-                  key={file.fileId}
-                  className="knowledge-item"
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center"
-                  }}
-                >
-
-                  <div>
-
-                    <div
-                      style={{
-                        fontWeight: 700
-                      }}
-                    >
-                      {file.name}
-                    </div>
-
-                    <div
-                      style={{
-                        fontSize: 12,
-                        color: "#777"
-                      }}
-                    >
-                      {file.status}
-                    </div>
-
-                  </div>
-
-                  <button
-                    className="icon-button"
-                    onClick={() => deleteFile(file.fileId)}
-                  >
-                    <Trash2 size={16} />
-                  </button>
-
+            {files.map((file) => (
+              <div className="modal-doc-item" key={file.fileId}>
+                <div>
+                  <strong>{file.name}</strong>
+                  <div className="file-status">{file.status}</div>
                 </div>
 
-              ))}
-
+                <button
+                  className="icon-button"
+                  onClick={() => deleteFile(file.fileId)}
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            ))}
           </div>
-
-        </div>
+        )}
 
         <div className="modal-actions">
-
-          <button
-            className="secondary-button"
-            onClick={onClose}
-          >
+          <button className="secondary-button" onClick={onClose}>
             Chiudi
           </button>
-
         </div>
-
       </div>
     </div>
   );
