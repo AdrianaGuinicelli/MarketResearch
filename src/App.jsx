@@ -95,7 +95,9 @@ setSelectedResearch((prev) => ({
   )
 }));
   }
-
+const sidebarResearches = researches.map((research) =>
+  research.id === selectedResearch.id ? selectedResearch : research
+);
   return (
     <div className="app-shell">
       <Header
@@ -110,12 +112,12 @@ setSelectedResearch((prev) => ({
       />
 
       <main className="workspace-grid">
-        <ResearchSidebar
-          researches={researches}
-          selectedResearch={selectedResearch}
-          onSelect={setSelectedResearch}
-          onNewResearch={() => setIsNewResearchOpen(true)}
-        />
+ <ResearchSidebar
+  researches={sidebarResearches}
+  selectedResearch={selectedResearch}
+  onSelect={setSelectedResearch}
+  onNewResearch={() => setIsNewResearchOpen(true)}
+/>
 
         <ChatWorkspace messages={messages} />
 
