@@ -135,13 +135,15 @@ export default function CompanyKnowledgeModal({ onClose }) {
           onDragLeave={handleDragLeave}
           onClick={() => inputRef.current?.click()}
         >
-          <Paperclip size={22} />
-          <strong>
-            {uploading ? "Caricamento in corso..." : "Trascina qui i file o clicca per caricare"}
-          </strong>
-          <span>
-            Puoi caricare più documenti contemporaneamente.
-          </span>
+      <Paperclip size={42} />
+
+<strong>
+  {uploading ? "Caricamento in corso..." : "Carica documenti"}
+</strong>
+
+<span>
+  Clicca qui oppure trascina uno o più file nella finestra
+</span>
         </div>
 
         {uploadedCount > 0 && (
