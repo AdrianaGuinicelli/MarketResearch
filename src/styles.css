@@ -678,5 +678,60 @@ h1 {
   font-style: italic;
   border-style: dashed;
 }
-  
+  .dropzone {
+  margin-top: 18px;
+  border: 2px dashed var(--carel-border);
+  background: #fbfbfc;
+  border-radius: 18px;
+  padding: 28px;
+  display: grid;
+  place-items: center;
+  gap: 8px;
+  text-align: center;
+  color: var(--carel-muted);
+  cursor: pointer;
+}
+
+.dropzone strong {
+  color: var(--carel-black);
+}
+
+.dropzone.dragging {
+  border-color: var(--carel-red);
+  background: var(--carel-soft-red);
+}
+
+.upload-feedback {
+  margin-top: 14px;
+  border: 1px solid #bbf7d0;
+  background: #f0fdf4;
+  color: #15803d;
+  border-radius: 12px;
+  padding: 11px 13px;
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.company-files-toolbar {
+  margin-top: 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.file-status {
+  margin-top: 4px;
+  color: var(--carel-muted);
+  font-size: 12px;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 }
