@@ -4,10 +4,10 @@ const groups = [
   ["Company Knowledge", "companyDocuments", Building2],
   ["Research Knowledge", "previousResearch", FileText],
   ["Web sources", "webSources", Globe2],
-  ["User inputs", "userInputs", UserRound]
+  ["User inputs & attachments", "userInputs", UserRound]
 ];
 
-export default function KnowledgePanel({ knowledge }) {
+export default function KnowledgePanel({ knowledge = {} }) {
   return (
     <aside className="knowledge-panel">
       <div className="panel-heading">
