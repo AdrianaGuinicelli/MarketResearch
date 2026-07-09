@@ -529,7 +529,6 @@ h1 {
   gap: 10px;
   margin-top: 18px;
 }
-
 @media (max-width: 1050px) {
   .workspace-grid {
     grid-template-columns: 240px 1fr;
@@ -540,7 +539,7 @@ h1 {
   }
 }
 
-  .modal-header {
+.modal-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -600,7 +599,8 @@ h1 {
   font-size: 11px;
   font-weight: 800;
 }
-  .milestone-summary {
+
+.milestone-summary {
   margin-top: 4px;
   border: none;
   background: transparent;
@@ -656,7 +656,8 @@ h1 {
   font-size: 12px;
   color: var(--carel-muted);
 }
-  .secondary-button.compact {
+
+.secondary-button.compact {
   padding: 8px 11px;
   font-size: 12px;
   border-radius: 9px;
@@ -673,19 +674,22 @@ h1 {
   font-size: 12px;
   font-weight: 800;
 }
+
 .knowledge-item.empty {
   background: #fafafa;
   color: var(--carel-muted);
   font-style: italic;
   border-style: dashed;
 }
+
 .dropzone {
   margin-top: 22px;
-  min-height: 230px;
+  min-height: 260px;
+  width: 100%;
   border: 2px dashed #fecdd3;
   background: var(--carel-soft-red);
-  border-radius: 18px;
-  padding: 34px;
+  border-radius: 22px;
+  padding: 36px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -703,7 +707,7 @@ h1 {
 .dropzone strong {
   display: block;
   color: var(--carel-black);
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 900;
 }
 
@@ -723,4 +727,37 @@ h1 {
   border-color: var(--carel-red);
   background: #fff1f2;
 }
+
+.upload-feedback {
+  margin-top: 14px;
+  border: 1px solid #bbf7d0;
+  background: #f0fdf4;
+  color: #15803d;
+  border-radius: 12px;
+  padding: 11px 13px;
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.company-files-toolbar {
+  margin-top: 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.file-status {
+  margin-top: 4px;
+  color: var(--carel-muted);
+  font-size: 12px;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
