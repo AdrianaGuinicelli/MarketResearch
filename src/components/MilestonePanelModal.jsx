@@ -1,4 +1,4 @@
-import { CheckCircle2, Circle, Lock, X } from "lucide-react";
+import { X } from "lucide-react";
 
 export default function MilestonePanelModal({
   milestones,
@@ -21,9 +21,7 @@ export default function MilestonePanelModal({
         </div>
 
         <p className="modal-copy">
-          Puoi dichiarare completata una milestone quando ritieni che quella
-          parte della ricerca sia sufficientemente matura. Non è obbligatorio
-          seguire un ordine rigido.
+          Puoi dichiarare completata una milestone quando ritieni che quella parte della ricerca sia sufficientemente matura. Non è obbligatorio seguire un ordine rigido.
         </p>
 
         <div className="milestone-panel-list">
@@ -33,46 +31,28 @@ export default function MilestonePanelModal({
             const isActive = milestone.key === activeMilestone.key;
 
             return (
-              <div
-                key={milestone.key}
-                className={`milestone-panel-item ${milestone.status}`}
-              >
-                <div className="milestone-panel-icon">
-                  {isCompleted && <CheckCircle2 size={20} />}
-                  {!isCompleted && !isLocked && <Circle size={20} />}
-                  {isLocked && <Lock size={20} />}
-                </div>
-
+              <div key={milestone.key} className={`milestone-panel-item ${milestone.status}`}>
                 <div className="milestone-panel-content">
-                  <strong>
-                    {index + 1}. {milestone.label}
-                  </strong>
+                  <strong>{index + 1}. {milestone.label}</strong>
 
                   <span>
-                    {isCompleted && "Completata"}
-                    {!isCompleted && isActive && "Attiva"}
-                    {!isCompleted && !isActive && !isLocked && "Disponibile"}
-                    {isLocked && "Bloccata"}
+                    {isCompleted && "Completed"}
+                    {!isCompleted && isActive && "Active"}
+                    {!isCompleted && !isActive && !isLocked && "Available"}
+                    {isLocked && "Locked"}
                   </span>
                 </div>
 
                 <div className="milestone-panel-action">
-                  {isCompleted && (
-                    <span className="doc-status">Completed</span>
-                  )}
+                  {isCompleted && <span className="doc-status">Completed</span>}
 
                   {!isCompleted && !isLocked && (
-                    <button
-                      className="secondary-button compact"
-                      onClick={() => onComplete(milestone)}
-                    >
+                    <button className="secondary-button compact" onClick={() => onComplete(milestone)}>
                       Completa
                     </button>
                   )}
 
-                  {isLocked && (
-                    <span className="locked-label">Locked</span>
-                  )}
+                  {isLocked && <span className="locked-label">Locked</span>}
                 </div>
               </div>
             );
@@ -85,9 +65,7 @@ export default function MilestonePanelModal({
           </div>
 
           <p>
-            Quando completi una milestone, il Navigator ti chiederà se vuoi
-            salvare l’output nella knowledge della ricerca o nella Company
-            Knowledge.
+            Quando completi una milestone, il Navigator ti chiederà se vuoi salvare l’output nella knowledge della ricerca o nella Company Knowledge.
           </p>
         </div>
 
