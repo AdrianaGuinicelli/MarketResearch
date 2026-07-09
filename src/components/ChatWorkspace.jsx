@@ -1,49 +1,6 @@
 import { useRef, useState } from "react";
 import { Paperclip, Send } from "lucide-react";
 
-function extractKnowledgeUsed(text) {
-  const knowledge = {
-    companyDocuments: [],
-    previousResearch: [],
-    webSources: [],
-    userInputs: []
-  };
-
-  const sectionStart = text.indexOf("Knowledge Used:");
-  if (sectionStart === -1) return knowledge;
-
-  const section = text.slice(sectionStart);
-
-  const lines = section
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean);
-
-  lines.forEach((line) => {
-    if (line.startsWith("- Company Knowledge:")) {
-      const value = line.replace("- Company Knowledge:", "").trim();
-      if (value && value !== "None") knowledge.companyDocuments.push(value);
-    }
-
-    if (line.startsWith("- Research Knowledge:")) {
-      const value = line.replace("- Research Knowledge:", "").trim();
-      if (value && value !== "None") knowledge.previousResearch.push(value);
-    }
-
-    if (line.startsWith("- Web sources:")) {
-      const value = line.replace("- Web sources:", "").trim();
-      if (value && value !== "None") knowledge.webSources.push(value);
-    }
-
-    if (line.startsWith("- User inputs and attachments:")) {
-      const value = line.replace("- User inputs and attachments:", "").trim();
-      if (value && value !== "None") knowledge.userInputs.push(value);
-    }
-  });
-
-  return knowledge;
-}
-
 export default function ChatWorkspace({ messages, onKnowledgeUsedChange }) {
   const [chatMessages, setChatMessages] = useState(messages);
   const [input, setInput] = useState("");
@@ -78,15 +35,16 @@ export default function ChatWorkspace({ messages, onKnowledgeUsedChange }) {
 
       const reply = data.reply || data.error || "No response generated.";
 
-      const aiMessage = {
-        role: "ai",
-        text: reply
-      };
+      setChatMessages((prev) => [
+        ...prev,
+        {
+          role: "ai",
+          text: reply
+        }
+      ]);
 
-      setChatMessages((prev) => [...prev, aiMessage]);
-
-      if (onKnowledgeUsedChange) {
-        onKnowledgeUsedChange(extractKnowledgeUsed(reply));
+      if (onKnowledgeUsedChange && data.knowledge) {
+        onKnowledgeUsedChange(data.knowledge);
       }
     } catch {
       setChatMessages((prev) => [
