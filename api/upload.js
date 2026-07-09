@@ -9,7 +9,7 @@ export const config = {
 
 function parseForm(req) {
   const form = formidable({
-    multiples: false,
+    multiples: true,
     keepExtensions: true
   });
 
@@ -21,18 +21,73 @@ function parseForm(req) {
   });
 }
 
+async function uploadSingleFile(file, vectorStoreId) {
+  const fileUploadForm = new FormData();
+
+  fileUploadForm.append("purpose", "assistants");
+  fileUploadForm.append(
+    "file",
+    new Blob([fs.readFileSync(file.filepath)]),
+    file.originalFilename || "uploaded_file"
+  );
+
+  const uploadResponse = await fetch("https://api.openai.com/v1/files", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
+    },
+    body: fileUploadForm
+  });
+
+  const uploadData = await uploadResponse.json();
+
+  if (!uploadResponse.ok) {
+    throw new Error(uploadData.error?.message || "OpenAI file upload error");
+  }
+
+  const attachResponse = await fetch(
+    `https://api.openai.com/v1/vector_stores/${vectorStoreId}/files`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        file_id: uploadData.id
+      })
+    }
+  );
+
+  const attachData = await attachResponse.json();
+
+  if (!attachResponse.ok) {
+    throw new Error(attachData.error?.message || "Vector store attach error");
+  }
+
+  return {
+    id: uploadData.id,
+    name: file.originalFilename,
+    type: file.mimetype,
+    vectorStoreFileId: attachData.id
+  };
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
   try {
-    const { fields, files } = await parseForm(req);
+    const { files } = await parseForm(req);
 
-    const scope = fields.scope?.[0] || fields.scope || "company";
-    const uploadedFile = files.file?.[0] || files.file;
+    const uploadedFilesRaw = files.file
+      ? Array.isArray(files.file)
+        ? files.file
+        : [files.file]
+      : [];
 
-    if (!uploadedFile) {
+    if (uploadedFilesRaw.length === 0) {
       return res.status(400).json({ error: "Missing file" });
     }
 
@@ -44,62 +99,17 @@ export default async function handler(req, res) {
       });
     }
 
-    const fileUploadForm = new FormData();
-    fileUploadForm.append("purpose", "assistants");
-    fileUploadForm.append(
-      "file",
-      new Blob([fs.readFileSync(uploadedFile.filepath)]),
-      uploadedFile.originalFilename || "uploaded_file"
-    );
+    const uploadedFiles = [];
 
-    const uploadResponse = await fetch("https://api.openai.com/v1/files", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
-      },
-      body: fileUploadForm
-    });
-
-    const uploadData = await uploadResponse.json();
-
-    if (!uploadResponse.ok) {
-      return res.status(uploadResponse.status).json({
-        error: uploadData.error?.message || "OpenAI file upload error"
-      });
-    }
-
-    const attachResponse = await fetch(
-      `https://api.openai.com/v1/vector_stores/${vectorStoreId}/files`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          file_id: uploadData.id
-        })
-      }
-    );
-
-    const attachData = await attachResponse.json();
-
-    if (!attachResponse.ok) {
-      return res.status(attachResponse.status).json({
-        error: attachData.error?.message || "Vector store attach error"
-      });
+    for (const file of uploadedFilesRaw) {
+      const uploaded = await uploadSingleFile(file, vectorStoreId);
+      uploadedFiles.push(uploaded);
     }
 
     return res.status(200).json({
       success: true,
-      scope,
-      vectorStoreId,
-      file: {
-        id: uploadData.id,
-        name: uploadedFile.originalFilename,
-        type: uploadedFile.mimetype,
-        vectorStoreFileId: attachData.id
-      }
+      uploadedCount: uploadedFiles.length,
+      files: uploadedFiles
     });
   } catch (error) {
     return res.status(500).json({
