@@ -14,6 +14,12 @@ import {
   knowledgeUsed as initialKnowledgeUsed
 } from "./data/mockData.js";
 
+const currentUser = {
+  id: "user_adriana",
+  name: "Adriana Guinicelli",
+  managerEmail: ""
+};
+
 const initialMilestones = [
   { key: "setup", label: "Setup", status: "completed" },
   { key: "collection", label: "Data Collection", status: "active" },
@@ -38,7 +44,9 @@ export default function App() {
     (milestone) => milestone.status === "completed"
   ).length;
 
-  const progress = Math.round((completedMilestones / milestones.length) * 100);
+  const progress = Math.round(
+    (completedMilestones / milestones.length) * 100
+  );
 
   const activeMilestone =
     milestones.find((milestone) => milestone.status === "active") ||
@@ -55,8 +63,23 @@ export default function App() {
     research.id === selectedResearch.id ? selectedResearch : research
   );
 
+  /*
+    Nel MOC tutte le ricerche presenti appartengono all'utente corrente.
+
+    Quando aggiungeremo login e database, questo array verrà filtrato
+    realmente usando l'ID dell'utente autenticato.
+  */
+  const userResearches = sidebarResearches;
+
+  const repositoryStats = {
+    folders: "—",
+    documents: "—",
+    lastSync: "Not available"
+  };
+
   function openCompleteMilestone(milestone = activeMilestone) {
     if (milestone.status === "locked") return;
+
     setSelectedMilestone(milestone);
     setIsMilestonePanelOpen(false);
     setIsCompleteOpen(true);
@@ -64,20 +87,28 @@ export default function App() {
 
   function handleSaveOutput() {
     const milestoneToComplete = selectedMilestone || activeMilestone;
+
+    const milestoneWasAlreadyCompleted =
+      milestoneToComplete.status === "completed";
+
+    const nextCompletedCount = milestoneWasAlreadyCompleted
+      ? completedMilestones
+      : completedMilestones + 1;
+
     const nextProgress = Math.round(
-      ((completedMilestones + 1) / milestones.length) * 100
+      (nextCompletedCount / milestones.length) * 100
     );
 
-    setMilestones((prev) =>
-      prev.map((milestone) =>
+    setMilestones((previousMilestones) =>
+      previousMilestones.map((milestone) =>
         milestone.key === milestoneToComplete.key
           ? { ...milestone, status: "completed" }
           : milestone
       )
     );
 
-    setSelectedResearch((prev) => ({
-      ...prev,
+    setSelectedResearch((previousResearch) => ({
+      ...previousResearch,
       status: milestoneToComplete.label,
       progress: nextProgress
     }));
@@ -89,7 +120,11 @@ export default function App() {
   return (
     <div className="app-shell">
       <Header
-        research={{ ...selectedResearch, status: activeMilestone.label, progress }}
+        research={{
+          ...selectedResearch,
+          status: activeMilestone.label,
+          progress
+        }}
         activeMilestone={activeMilestone}
         currentMilestoneIndex={currentMilestoneIndex}
         totalMilestones={milestones.length}
@@ -116,11 +151,16 @@ export default function App() {
       </main>
 
       {isNewResearchOpen && (
-        <NewResearchModal onClose={() => setIsNewResearchOpen(false)} />
+        <NewResearchModal
+          onClose={() => setIsNewResearchOpen(false)}
+        />
       )}
 
       {isCompanyKnowledgeOpen && (
         <CompanyKnowledgeModal
+          researches={userResearches}
+          currentUser={currentUser}
+          repositoryStats={repositoryStats}
           onClose={() => setIsCompanyKnowledgeOpen(false)}
         />
       )}
@@ -156,4 +196,3 @@ export default function App() {
     </div>
   );
 }
-
