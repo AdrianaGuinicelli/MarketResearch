@@ -85,37 +85,102 @@ export default function App() {
     setIsCompleteOpen(true);
   }
 
-  function handleSaveOutput() {
-    const milestoneToComplete = selectedMilestone || activeMilestone;
+function handleSaveOutput() {
+  const milestoneToComplete = selectedMilestone || activeMilestone;
 
-    const milestoneWasAlreadyCompleted =
-      milestoneToComplete.status === "completed";
-
-    const nextCompletedCount = milestoneWasAlreadyCompleted
-      ? completedMilestones
-      : completedMilestones + 1;
-
-    const nextProgress = Math.round(
-      (nextCompletedCount / milestones.length) * 100
+  setMilestones((previousMilestones) => {
+    let updatedMilestones = previousMilestones.map((milestone) =>
+      milestone.key === milestoneToComplete.key
+        ? { ...milestone, status: "completed" }
+        : milestone
     );
 
-    setMilestones((previousMilestones) =>
-      previousMilestones.map((milestone) =>
-        milestone.key === milestoneToComplete.key
-          ? { ...milestone, status: "completed" }
-          : milestone
+    const prerequisiteKeys = [
+      "setup",
+      "collection",
+      "modeling",
+      "validation"
+    ];
+
+    const prerequisitesCompleted = prerequisiteKeys.every((key) =>
+      updatedMilestones.some(
+        (milestone) =>
+          milestone.key === key && milestone.status === "completed"
       )
     );
 
+    updatedMilestones = updatedMilestones.map((milestone) => {
+      if (milestone.key === "summary") {
+        if (milestone.status === "completed") {
+          return milestone;
+        }
+
+        return {
+          ...milestone,
+          status: prerequisitesCompleted ? "active" : "locked"
+        };
+      }
+
+      return milestone;
+    });
+
+    const hasActiveMilestone = updatedMilestones.some(
+      (milestone) => milestone.status === "active"
+    );
+
+    if (!hasActiveMilestone && !prerequisitesCompleted) {
+      const firstIncomplete = updatedMilestones.find(
+        (milestone) =>
+          milestone.key !== "summary" &&
+          milestone.status !== "completed"
+      );
+
+      if (firstIncomplete) {
+        updatedMilestones = updatedMilestones.map((milestone) => {
+          if (milestone.key === firstIncomplete.key) {
+            return { ...milestone, status: "active" };
+          }
+
+          if (
+            milestone.key !== "summary" &&
+            milestone.status !== "completed"
+          ) {
+            return { ...milestone, status: "todo" };
+          }
+
+          return milestone;
+        });
+      }
+    }
+
+    const completedCount = updatedMilestones.filter(
+      (milestone) => milestone.status === "completed"
+    ).length;
+
+    const updatedProgress = Math.round(
+      (completedCount / updatedMilestones.length) * 100
+    );
+
+    const nextActiveMilestone =
+      updatedMilestones.find(
+        (milestone) => milestone.status === "active"
+      ) || milestoneToComplete;
+
     setSelectedResearch((previousResearch) => ({
       ...previousResearch,
-      status: milestoneToComplete.label,
-      progress: nextProgress
+      status:
+        updatedProgress === 100
+          ? "Completed"
+          : nextActiveMilestone.label,
+      progress: updatedProgress
     }));
 
-    setIsCompleteOpen(false);
-    setIsSavedOpen(true);
-  }
+    return updatedMilestones;
+  });
+
+  setIsCompleteOpen(false);
+  setIsSavedOpen(true);
+}
 
   return (
     <div className="app-shell">
