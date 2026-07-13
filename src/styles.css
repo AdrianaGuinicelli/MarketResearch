@@ -760,4 +760,57 @@ h1 {
   to {
     transform: rotate(360deg);
   }
+  .repository-status-card {
+  margin-top: 20px;
+  border: 1px solid #fecdd3;
+  background: var(--carel-soft-red);
+  border-radius: 18px;
+  padding: 18px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.repository-status-card p {
+  margin: 6px 0 0;
+  color: var(--carel-muted);
+  line-height: 1.4;
+}
+
+.repository-status-icon {
+  color: var(--carel-red);
+}
+
+.repository-stats-grid {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.repository-stat {
+  border: 1px solid var(--carel-border);
+  background: #fbfbfc;
+  border-radius: 16px;
+  padding: 16px;
+  display: grid;
+  gap: 8px;
+}
+
+.repository-stat svg {
+  color: var(--carel-red);
+}
+
+.repository-stat span {
+  color: var(--carel-muted);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.repository-stat strong {
+  color: var(--carel-black);
+  font-size: 18px;
+}
 }
