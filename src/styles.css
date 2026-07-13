@@ -813,4 +813,99 @@ h1 {
   color: var(--carel-black);
   font-size: 18px;
 }
+.approval-form {
+  margin-top: 22px;
+  border-top: 1px solid var(--carel-border);
+  padding-top: 20px;
+}
+
+.approval-form-heading h3 {
+  margin: 10px 0 2px;
+  color: var(--carel-black);
+}
+
+.approval-form select {
+  width: 100%;
+  margin-top: 7px;
+  border: 1px solid var(--carel-border);
+  border-radius: 12px;
+  padding: 12px;
+  outline: none;
+  background: #ffffff;
+  color: var(--carel-text);
+  font-family: inherit;
+}
+
+.approval-form select:focus,
+.approval-form input:focus,
+.approval-form textarea:focus {
+  border-color: var(--carel-red);
+  box-shadow: 0 0 0 3px rgba(227, 6, 19, 0.08);
+}
+
+.approval-research-status {
+  margin-top: 12px;
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.approval-research-status.complete {
+  border: 1px solid #bbf7d0;
+  background: #f0fdf4;
+  color: #15803d;
+}
+
+.approval-research-status.incomplete {
+  border: 1px solid #fed7aa;
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+.approval-research-status div {
+  display: grid;
+  gap: 3px;
+}
+
+.approval-research-status span {
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.approval-message {
+  margin-top: 16px;
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.approval-message div {
+  display: grid;
+  gap: 3px;
+}
+
+.approval-message span {
+  font-size: 12px;
+}
+
+.approval-message.success {
+  border: 1px solid #bbf7d0;
+  background: #f0fdf4;
+  color: #15803d;
+}
+
+.approval-message.error {
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.primary-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 }
